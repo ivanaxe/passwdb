@@ -102,12 +102,24 @@ class client_side(object):
             encrypted_password = encrypt(encryption_key, new_password, cipher)
             self.server._store_one(compound_key, encrypted_password)
 
+def print_help():
+    print """
+        Usage:
+        pwdtool.py OPTIONS
+        -h : print help and exit.
+        -c, --cconf= : path to client config
+        -s, --sconf= : path to server config
+        -d : generate default configs and exit
+        -a --action= : action to perform
+
+        actions can be update_password (2 args : id and new value) and get_password (1 arg : id of a pasword that we want to get)
+    """
 
 def parse_args(argv):
     try:
         opts, args = getopt.getopt(argv,"hdc:s:a:",["cconf=","sconf=","action="])
     except getopt.GetoptError:
-        print "invalid args #FIXME : more verbose explanation needed"
+        print_help()
         sys.exit(2)
     
     return [opts, args] 
@@ -129,7 +141,9 @@ if __name__ == "__main__":
     env = {}
     for arg in args:
         env.update({arg[0] : arg[1]})
-    print env
+    if "-h" in env.keys():
+        print_help()
+        exit(0)
 
     #
     # default config, hardcoded
