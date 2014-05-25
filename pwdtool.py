@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+# TODO : spam protection needed!
+# TODO : хранение истории
+# TODO : защита от злоадмина  
+
 import sys, getopt
 import yaml
 
