@@ -54,6 +54,12 @@ class storage:
         return data.keys()
 
 class server_side:
+    """
+    Data is curently stored in key-value style :
+    (username, password_description, cipher, key) is key
+    encrypted password is value
+    """
+
     def __init__(self, storage=None, ):
         if storage == None:
             print "internal storage not implemented yet"
@@ -67,9 +73,15 @@ class server_side:
 
     def get_all_keys_by_request(self, request):
         all_keys = self.storage.get_all_keys()
+        # (username, password_description, cipher, key)
         return filter(lambda x : x[1] == request, all_keys)
 
+    def get_all_compound_keys(self):
+        all_keys = self.storage.get_all_keys()
+        return all_keys
+
 class client_side(object):
+    # (username, password_description, cipher, key)
     def __init__(self, name="example.client", cipher=None, key=None, server=None):
         self.name = name
         self.cipher = cipher
@@ -102,6 +114,47 @@ class client_side(object):
             encrypted_password = encrypt(encryption_key, new_password, cipher)
             self.server._store_one(compound_key, encrypted_password)
 
+    def get_my_password_names(self):
+        my_password_names = map(
+                                lambda x : x[1],
+                                filter(lambda x : x[0] == self.name, server.get_all_compound_keys())
+                            )
+        return my_password_names
+
+    def get_all_users(self):
+        all_compound_keys = server.get_all_compound_keys()
+        all_users = []
+        for compound_key in all_compound_keys:
+            if compound_key[0] not in all_users:
+                all_users.append(compound_key[0])
+        return all_users
+
+    def grant_password(self, newuser, password_id):
+        compound_key = None
+        try:
+            candidate_compound_key =  filter(lambda x : x[0] == newuser, server.get_all_compound_keys())[0]
+            candidate_compound_key[1] = password_id
+            compound_key = tuple(candidate_compound_key)
+        except:
+            print "Can't get such user"
+
+        # FIXME : need better encrypt/decrypt interface
+        # e.g. class that takes a pair (cipher, key) and does all dirty work
+        encrypted_password = ""
+        if compound_key[2] == "RSA":
+            encryption_key = RSA.importKey(compound_key[3])
+            encrypted_password = encrypt(encryption_key, "RSA", self.get_password(password_id))
+        elif compound_key[2] == "None":
+            encrypted_password = self.get_password(password_id)
+        else:
+            print "Can't grant password : unsuported cipher"
+            return None
+
+        server._store_one(compound_key)
+
+    def touch(self):
+        pass
+
 def print_help():
     print """
         Usage:
@@ -112,7 +165,12 @@ def print_help():
         -d : generate default configs and exit
         -a --action= : action to perform
 
-        actions can be update_password (2 args : id and new value) and get_password (1 arg : id of a pasword that we want to get)
+        actions can be
+          update_password (2 args : id and new value)
+          get_password (1 arg : id of a pasword that we want to get)
+          get_all_users
+          get_my_password_names
+          grant_password
     """
 
 def parse_args(argv):
@@ -184,17 +242,41 @@ if __name__ == "__main__":
         action = env["-a"]
         params = opt
 
+        # FIXME!!! Must be a normal dispatching handler
         if action == "update_password" :
             try:
                 client.update_password(*params)
                 sys.exit(0)
             except:
+                print "FIXME!!! Some error"
                 sys.exit(100)            
         elif action == "get_password" :
             try:
                 print client.get_password(*params)
                 sys.exit(0)
             except:
+                print "FIXME!!! Some error"
+                sys.exit(100)
+        elif action == "get_my_password_names" :
+            try:
+                print client.get_my_password_names(*params)
+                sys.exit(0)
+            except:
+                print "FIXME!!! Some error"
+                sys.exit(100)
+        elif action == "get_all_users" :
+            try:
+                print client.get_all_users(*params)
+                sys.exit(0)
+            except:
+                print "FIXME!!! Some error"
+                sys.exit(100)
+        elif action == "grant_password" :
+            try:
+                print client.grant_password(*params)
+                sys.exit(0)
+            except:
+                print "FIXME!!! Some error"
                 sys.exit(100)
         else :
             print "Not implemented"
