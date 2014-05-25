@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 # TODO : spam protection needed!
-# TODO : хранение истории
-# TODO : защита от злоадмина  
+# TODO : store history
+# TODO : protection from evil admin
 
 import sys, getopt
 import yaml
@@ -108,6 +108,7 @@ class client_side(object):
         encrypted_password = encrypt(self.encryption_key, new_password, self.cipher)
         return server._store_one(compound_key, encrypted_password)
 
+    # FIXME! Must protect from creating duplicate password names
     def update_password(self, request, new_password):
         all_keys_by_request = self.server.get_all_keys_by_request(request)
         if (self.name, request, self.cipher, self.encryption_key) not in all_keys_by_request:
@@ -207,32 +208,28 @@ if __name__ == "__main__":
         print_help()
         exit(0)
 
-    #
-    # default config, hardcoded
-    #
-    server_config = { "storage_path" : "/tmp/111", }
+    from default_config import *
 
-    from Crypto.PublicKey import RSA
-    key = RSA.generate(2048)    
-    client_config = { "name" : "user@example.client",
-                      "cipher" : "RSA",
-                      "key" : key.exportKey() }
+    if "-c" in env.keys():
+        client_config_path = env["-c"]
+    if "-s" in env.keys():
+        server_config_path = env["-s"]
     #
     # if we want just to print default configs, do it and exit!
     #
     if "-d" in env.keys():
         if "-c" in env.keys():
-            open(env["-c"], "w").write(yaml.dump(client_config))
+            open(client_config_path+".example", "w").write(yaml.dump(client_config))
         if "-s" in env.keys():
-            open(env["-s"], "w").write(yaml.dump(server_config))
+            open(server_config_path+".example", "w").write(yaml.dump(server_config))
         sys.exit(0)
     #
     # if client or server config defined, load it!
     #
     if "-c" in env.keys():
-        client_config = yaml.load(open(env["-c"],"r"))
+        client_config = yaml.load(open(client_config_path,"r"))
     if "-s" in env.keys():
-        server_config = yaml.load(open(env["-s"],"r"))
+        server_config = yaml.load(open(server_config_path,"r"))
 
     #
     # create server
