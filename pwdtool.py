@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+# TODO : need to protect from overwriting password entries if creating new one
 # TODO : spam protection needed!
 # TODO : store history
 # TODO : protection from evil admin
