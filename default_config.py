@@ -5,7 +5,7 @@
 #
 
 client_config_path = "/etc/passwdb.client.conf"
-server_config_path = "/etc/passwdb.client.conf"
+server_config_path = "/etc/passwdb.server.conf"
 
 server_config = { "storage_path" : "/tmp/111", }
 
