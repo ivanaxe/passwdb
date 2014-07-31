@@ -5,7 +5,7 @@
 # TODO : store history
 # TODO : protection from evil admin
 
-import sys, getopt
+import sys, getopt, traceback
 import yaml
 
 def encrypt(key, string, cipher):
@@ -248,37 +248,41 @@ if __name__ == "__main__":
         if action == "update_password" :
             try:
                 client.update_password(*params)
-                sys.exit(0)
             except:
                 print "FIXME!!! Some error"
+                traceback.print_exc(file=sys.stdout)
                 sys.exit(100)            
+            sys.exit(0)
         elif action == "get_password" :
             try:
                 print client.get_password(*params)
-                sys.exit(0)
             except:
                 print "FIXME!!! Some error"
+                traceback.print_exc(file=sys.stdout)
                 sys.exit(100)
+            sys.exit(0)
         elif action == "get_my_password_names" :
             try:
                 print client.get_my_password_names(*params)
-                sys.exit(0)
             except:
                 print "FIXME!!! Some error"
+                traceback.print_exc(file=sys.stdout)
                 sys.exit(100)
+            sys.exit(0)
         elif action == "get_all_users" :
             try:
                 print client.get_all_users(*params)
-                sys.exit(0)
             except:
                 print "FIXME!!! Some error"
                 sys.exit(100)
+            sys.exit(0)
         elif action == "grant_password" :
             try:
                 print client.grant_password(*params)
-                sys.exit(0)
             except:
                 print "FIXME!!! Some error"
+                traceback.print_exc(file=sys.stdout)
                 sys.exit(100)
+            sys.exit(0)
         else :
             print "Not implemented"
